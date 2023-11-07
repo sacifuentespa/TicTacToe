@@ -21,6 +21,9 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 8em;
-    height: 8em;
+
+}
+
+.grid-item:hover {
+    background-color: grey;
 }
