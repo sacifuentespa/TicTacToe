@@ -1,4 +1,4 @@
-const board = document.querySelector('.board');
+const boardFront = document.querySelector('.board');
 const GRID_SIZE = 3;
 
 function calculateGridDimensions() {
@@ -11,10 +11,10 @@ function calculateGridDimensions() {
 function createGrid() {
     for (let row = 0; row < GRID_SIZE; row++) {
         const gridDimension = calculateGridDimensions();
-        const itemSize = Math.floor((gridDimension)/GRID_SIZE);
+        const itemSize = Math.floor((gridDimension) / GRID_SIZE);
         const rowItem = document.createElement("div");
         rowItem.classList.add("row")
-        rowItem.id= row;
+        rowItem.id = row;
         for (let column = 0; column < GRID_SIZE; column++) {
             const gridItem = document.createElement("div");
             gridItem.classList.add("grid-item");
@@ -24,7 +24,7 @@ function createGrid() {
             gridItem.id = `${row},${column}`;
             rowItem.appendChild(gridItem);
         }
-        board.appendChild(rowItem);
+        boardFront.appendChild(rowItem);
     }
 }
 
@@ -32,19 +32,142 @@ createGrid();
 
 const Gameboard = (() => {
     const board = [["", "", ""], ["", "", ""], ["", "", ""]];
-  
+
     const getBoard = () => board;
-  
-    const makeMove = (row,col, playerSymbol) => {
-      if (board[row][col] === "") {
-        board[row][col] = playerSymbol;
-        // Update the game display or check for a win here
-      }
+
+    const makeMove = (row, col, playerSymbol) => {
+        if (board[row][col] === "") {
+            board[row][col] = playerSymbol;
+            // Update the game display or check for a win here
+        }
     };
-  
+    const reset = () => {
+        for(let row = 0;row<GRID_SIZE;row++){
+            for (let col = 0;col<GRID_SIZE;col++){
+                board[row][col] = "";
+            }
+        }
+    }
+
     return {
-      getBoard,
-      makeMove,
-      
+        getBoard,
+        makeMove,
+        reset,
     };
-  })();
+})();
+
+const Player = (name, marker) => {
+    const getName = () => name;
+    const getMarker = () => marker;
+
+    return {
+        getName,
+        getMarker,
+    };
+};
+
+const GameControl = (() => {
+    const player1 = Player("Player 1", "X");
+    const player2 = Player("Player 2", "O");
+    let currentPlayer = player1;
+    let gameboard = Gameboard;
+
+    const startGame = () => {
+        //variable name due to the fact that board has been declared before
+        const board = gameboard.getBoard();
+        console.log(board);
+        while (checkWinner() === false && isBoardFull() == false) {
+            let playerChoice = prompt("Choose coordinate for the move").split(",");
+            if (gameboard.getBoard()[playerChoice[0]][playerChoice[1]] == "") {
+                gameboard.makeMove(playerChoice[0], playerChoice[1], currentPlayer.getMarker())
+                console.log(`the player ${currentPlayer.getMarker()} chooses ${playerChoice}`)
+            }
+            if(checkWinner() === false && isBoardFull() == false){
+                switchPlayer();
+            }else{
+                console.log(checkWinner())
+                let decision = prompt("do you want to reset?")
+                if (decision == "yes"){
+                    gameboard.reset();
+                }
+            }
+            
+        }
+
+        // Initialize the game, display, and event listeners
+    };
+
+    const switchPlayer = () => {
+        currentPlayer = currentPlayer === player1 ? player2 : player1;
+    };
+
+    const checkWinner = () => {
+
+        const board = gameboard.getBoard();
+        
+        // Check rows, columns, and diagonals for a win
+        if (checkRows() || checkColumns() || checkDiagonals()) {
+            // If any of the checks return true, a player has won
+            return (`${currentPlayer.getName()}`);
+        } else if (isBoardFull()) {
+            // If the board is full and no player has won, it's a draw
+            return (`draw`)
+        }else{
+            return false;
+        }
+    };
+
+    const checkRows = () => {
+        const board = gameboard.getBoard();
+        for (let row = 0; row < 3; row++) {
+            if (board[row][0] !== "" && board[row][0] === board[row][1] && board[row][1] === board[row][2]) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const checkColumns = () => {
+        const board = gameboard.getBoard();
+        for (let col = 0; col < GRID_SIZE; col++) {
+            if (board[0][col] !== "" && board[0][col] === board[1][col] && board[1][col] === board[2][col]) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const checkDiagonals = () => {
+
+        const board = gameboard.getBoard();
+        if (board[0][0] !== "" && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
+            return true;
+        }
+        if (board[0][2] !== "" && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
+            return true;
+        }
+        return false;
+    };
+
+    const isBoardFull = () => {
+        const board = gameboard.getBoard();
+        for (let row = 0; row < GRID_SIZE; row++) {
+            for (let col = 0; col < GRID_SIZE; col++) {
+                if (board[row][col] === "") {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    // Other game control methods and logic
+
+    return {
+        startGame,
+        checkWinner,
+        // Other public methods and properties
+    };
+})();
+
+GameControl.startGame();
