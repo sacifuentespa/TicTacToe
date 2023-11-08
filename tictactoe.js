@@ -1,5 +1,7 @@
 const boardFront = document.querySelector('.board');
 const GRID_SIZE = 3;
+const resetButton = document.querySelector('button')
+const announcement = document.querySelector('h2')
 
 function calculateGridDimensions() {
     const screenWidth = window.innerWidth;
@@ -42,8 +44,8 @@ const Gameboard = (() => {
         }
     };
     const reset = () => {
-        for(let row = 0;row<GRID_SIZE;row++){
-            for (let col = 0;col<GRID_SIZE;col++){
+        for (let row = 0; row < GRID_SIZE; row++) {
+            for (let col = 0; col < GRID_SIZE; col++) {
                 board[row][col] = "";
             }
         }
@@ -76,24 +78,55 @@ const GameControl = (() => {
         //variable name due to the fact that board has been declared before
         const board = gameboard.getBoard();
         console.log(board);
+        const gridItems = document.querySelectorAll('.grid-item');
+        announcement.innerHTML = `${currentPlayer.getMarker()} moves` 
+        gridItems.forEach((item) => {
+            item.addEventListener('click', (event) => {
+                // Check if the clicked grid item is empty
+                const [row, col] = event.target.id.split(',');
+                item.innerHTML = currentPlayer.getMarker();
+                if (gameboard.getBoard()[row][col] === "") {
+                    // Make a move for the current player
+                    gameboard.makeMove(row, col, currentPlayer.getMarker());
+                    // Check for a win or a draw
+                    if (checkWinner()) {
+                        announcement.innerHTML = checkWinner();
+                        switchPlayer();
+                    }
+                    else {
+                        // Switch to the other player
+                        switchPlayer();
+                        announcement.innerHTML = `${currentPlayer.getMarker()} moves` 
+                    }
+                }
+            });
+        });
+        resetButton.addEventListener('click',()=>{
+            gameboard.reset();
+            gridItems.forEach((item)=>{
+                item.innerHTML = "";
+                announcement.innerHTML = `${currentPlayer.getMarker()} moves`;
+            })
+        })
+        /* This was for console check
         while (checkWinner() === false && isBoardFull() == false) {
             let playerChoice = prompt("Choose coordinate for the move").split(",");
             if (gameboard.getBoard()[playerChoice[0]][playerChoice[1]] == "") {
                 gameboard.makeMove(playerChoice[0], playerChoice[1], currentPlayer.getMarker())
                 console.log(`the player ${currentPlayer.getMarker()} chooses ${playerChoice}`)
             }
-            if(checkWinner() === false && isBoardFull() == false){
+            if (checkWinner() === false && isBoardFull() == false) {
                 switchPlayer();
-            }else{
+            } else {
                 console.log(checkWinner())
                 let decision = prompt("do you want to reset?")
-                if (decision == "yes"){
+                if (decision == "yes") {
                     gameboard.reset();
                 }
             }
-            
-        }
 
+        }
+        */
         // Initialize the game, display, and event listeners
     };
 
@@ -104,15 +137,15 @@ const GameControl = (() => {
     const checkWinner = () => {
 
         const board = gameboard.getBoard();
-        
+
         // Check rows, columns, and diagonals for a win
         if (checkRows() || checkColumns() || checkDiagonals()) {
             // If any of the checks return true, a player has won
-            return (`${currentPlayer.getName()}`);
+            return (`${currentPlayer.getName()} with marker ${currentPlayer.getMarker()} wins`);
         } else if (isBoardFull()) {
             // If the board is full and no player has won, it's a draw
-            return (`draw`)
-        }else{
+            return (`draw`);
+        } else {
             return false;
         }
     };

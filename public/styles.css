@@ -27,3 +27,12 @@ body{
 .grid-item:hover {
     background-color: grey;
 }
+
+h1{
+    font-size: large;
+    margin: 2px;
+}
+h2{
+    font-size: medium;
+    margin: 2px;
+}
