@@ -79,56 +79,46 @@ const GameControl = (() => {
         const board = gameboard.getBoard();
         console.log(board);
         const gridItems = document.querySelectorAll('.grid-item');
-        announcement.innerHTML = `${currentPlayer.getMarker()} moves` 
+        announcement.innerHTML = `${currentPlayer.getMarker()} moves`
         gridItems.forEach((item) => {
-            item.addEventListener('click', (event) => {
-                // Check if the clicked grid item is empty
-                const [row, col] = event.target.id.split(',');
-                item.innerHTML = currentPlayer.getMarker();
-                if (gameboard.getBoard()[row][col] === "") {
-                    // Make a move for the current player
-                    gameboard.makeMove(row, col, currentPlayer.getMarker());
-                    // Check for a win or a draw
-                    if (checkWinner()) {
-                        announcement.innerHTML = checkWinner();
-                        switchPlayer();
-                    }
-                    else {
-                        // Switch to the other player
-                        switchPlayer();
-                        announcement.innerHTML = `${currentPlayer.getMarker()} moves` 
-                    }
-                }
-            });
+            item.addEventListener('click', addPlayerChoice);
         });
-        resetButton.addEventListener('click',()=>{
+
+        resetButton.addEventListener('click', () => {
             gameboard.reset();
-            gridItems.forEach((item)=>{
+            gridItems.forEach((item) => {
                 item.innerHTML = "";
                 announcement.innerHTML = `${currentPlayer.getMarker()} moves`;
             })
         })
-        /* This was for console check
-        while (checkWinner() === false && isBoardFull() == false) {
-            let playerChoice = prompt("Choose coordinate for the move").split(",");
-            if (gameboard.getBoard()[playerChoice[0]][playerChoice[1]] == "") {
-                gameboard.makeMove(playerChoice[0], playerChoice[1], currentPlayer.getMarker())
-                console.log(`the player ${currentPlayer.getMarker()} chooses ${playerChoice}`)
-            }
-            if (checkWinner() === false && isBoardFull() == false) {
-                switchPlayer();
-            } else {
-                console.log(checkWinner())
-                let decision = prompt("do you want to reset?")
-                if (decision == "yes") {
-                    gameboard.reset();
-                }
-            }
 
-        }
-        */
-        // Initialize the game, display, and event listeners
     };
+
+
+    // Check if the clicked grid item is empty
+    const addPlayerChoice = (event) => {
+        const [row, col] = event.currentTarget.id.split(',');
+
+        if (gameboard.getBoard()[row][col] === "" && !checkWinner()) {
+            // Make a move for the current player
+            event.currentTarget.innerHTML = currentPlayer.getMarker();
+            gameboard.makeMove(row, col, currentPlayer.getMarker());
+            
+            // Check for a win or a draw
+            if (checkWinner()) {
+                announcement.innerHTML = checkWinner();
+                switchPlayer();
+            }
+            else {
+                // Switch to the other player
+                switchPlayer();
+                announcement.innerHTML = `${currentPlayer.getMarker()} moves`
+            }
+        }
+
+    }
+
+
 
     const switchPlayer = () => {
         currentPlayer = currentPlayer === player1 ? player2 : player1;
